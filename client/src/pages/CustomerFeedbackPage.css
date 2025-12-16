@@ -1,0 +1,262 @@
+.customer-feedback-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  color: #2c3e50;
+  font-size: 2rem;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.btn-primary:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.feedback-form-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.feedback-form-card h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.feedback-form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #34495e;
+  font-size: 0.9rem;
+}
+
+.rating-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.star-label {
+  cursor: pointer;
+  font-size: 2rem;
+  color: #f39c12;
+  transition: transform 0.2s;
+}
+
+.star-label:hover {
+  transform: scale(1.2);
+}
+
+.star-label input[type="radio"] {
+  display: none;
+}
+
+.star-label input[type="radio"]:checked ~ .star,
+.star-label:hover .star {
+  color: #f39c12;
+}
+
+.star {
+  display: block;
+}
+
+.rating-display {
+  margin-left: 1rem;
+  font-size: 1.2rem;
+  color: #f39c12;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.char-count {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+}
+
+.feedbacks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feedbacks-list h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.feedback-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.feedback-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stars {
+  font-size: 1.5rem;
+  color: #f39c12;
+}
+
+.rating-number {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.feedback-date {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.feedback-booking {
+  color: #34495e;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.feedback-comment {
+  margin-bottom: 1rem;
+}
+
+.feedback-comment p {
+  color: #2c3e50;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.feedback-response {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+  margin-top: 1rem;
+}
+
+.response-header {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.feedback-response p {
+  color: #34495e;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.empty-state {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 3rem;
+  font-size: 1.1rem;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.customer-only {
+  text-align: center;
+  padding: 3rem;
+  color: #e74c3c;
+  font-size: 1.2rem;
+}
+
