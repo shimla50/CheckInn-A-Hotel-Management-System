@@ -5,12 +5,17 @@
 
 import Booking from '../models/Booking.js';
 import Room from '../models/Room.js';
+import Payment from '../models/Payment.js';
 import { successResponse, errorResponse } from '../utils/ApiResponse.js';
 import { isRoomAvailable, getBookedRoomIds } from '../utils/roomAvailability.js';
 import {
   sendBookingConfirmation,
   sendBookingApproved,
 } from '../services/notificationService.js';
+import {
+  calculateBookingTotal,
+  generateInvoiceNumber,
+} from '../services/billingService.js';
 
 /**
  * Create a new booking
@@ -449,9 +454,11 @@ export const approveBooking = async (req, res, next) => {
     await booking.populate('guest', 'name email');
     await booking.populate('createdBy', 'name email role');
 
-    // Send booking approved notification
+    // Send booking approved notification (also sends confirmation email)
     try {
       await sendBookingApproved(booking.guest, booking);
+      // Also send confirmation email for consistency
+      await sendBookingConfirmation(booking.guest, booking);
     } catch (notifError) {
       console.error('Failed to send booking approved notification:', notifError);
       // Don't fail the request if notification fails
@@ -621,6 +628,30 @@ export const checkOutGuest = async (req, res, next) => {
     booking.status = 'checked_out';
     await booking.save();
 
+    // Calculate total billing amount (room + services)
+    const billingDetails = await calculateBookingTotal(booking);
+    const totalPaid = await Payment.find({
+      booking: booking._id,
+      status: 'paid',
+    }).then(payments => payments.reduce((sum, p) => sum + p.amount, 0));
+
+    // Auto-generate invoice if not already generated
+    const existingPayment = await Payment.findOne({ booking: booking._id });
+    let invoiceNumber = existingPayment?.invoiceNumber;
+    
+    if (!invoiceNumber) {
+      invoiceNumber = generateInvoiceNumber();
+      // Create a pending payment record to track the invoice
+      // Staff will mark it as paid when payment is received
+      await Payment.create({
+        booking: booking._id,
+        amount: billingDetails.totalCost,
+        paymentMethod: 'pending', // Will be updated when payment is recorded
+        status: 'pending',
+        invoiceNumber,
+      });
+    }
+
     // Check if room can be marked as available
     // Only mark as available if there are no overlapping bookings
     const roomId = booking.room._id;
@@ -644,8 +675,22 @@ export const checkOutGuest = async (req, res, next) => {
       }
     }
 
+    // Populate booking details for response
+    await booking.populate('room', 'code type pricePerNight amenities maxGuests');
+    await booking.populate('guest', 'name email');
+
     res.status(200).json(
-      successResponse('Guest checked out successfully', { booking }, 200)
+      successResponse('Guest checked out successfully', {
+        booking,
+        invoice: {
+          invoiceNumber,
+          totalCost: billingDetails.totalCost,
+          roomCost: billingDetails.roomCost,
+          servicesCost: billingDetails.servicesCost,
+          totalPaid,
+          balanceDue: billingDetails.totalCost - totalPaid,
+        },
+      }, 200)
     );
   } catch (error) {
     next(error);

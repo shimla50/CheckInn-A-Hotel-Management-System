@@ -17,13 +17,12 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true,
-  })
-);
+
+app.use(cors({
+  origin: ["http://localhost:3000"],
+  credentials: true
+}));
+
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));

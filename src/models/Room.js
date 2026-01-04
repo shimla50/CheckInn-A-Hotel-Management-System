@@ -10,7 +10,9 @@ import mongoose from 'mongoose';
  * @property {string} code - Room code/number (unique identifier)
  * @property {('single'|'double'|'suite')} type - Room type
  * @property {number} pricePerNight - Price per night
- * @property {string[]} amenities - List of room amenities
+ * @property {string[]} amenities - List of FREE built-in room amenities (e.g., Breakfast, WiFi, AC, TV)
+ *                                  Note: These are included in room price and do NOT add extra cost.
+ *                                  Additional paid services (laundry, meals, etc.) are managed via Service model.
  * @property {('available'|'booked'|'maintenance')} status - Room availability status
  * @property {number} maxGuests - Maximum number of guests
  * @property {Date} createdAt - Room creation timestamp
@@ -22,7 +24,6 @@ const roomSchema = new mongoose.Schema(
     code: {
       type: String,
       required: [true, 'Room code is required'],
-      unique: true,
       trim: true,
       uppercase: true,
       maxlength: [20, 'Room code cannot exceed 20 characters'],
@@ -77,7 +78,6 @@ roomSchema.pre('save', function (next) {
 roomSchema.index({ status: 1 }); // Query by status
 roomSchema.index({ type: 1, status: 1 }); // Query by type and status
 roomSchema.index({ code: 1 }, { unique: true }); // Enforce unique room code at DB level
-// roomSchema.index({ code: 1 }); // Unique index on code (already unique, but explicit index)
 
 const Room = mongoose.model('Room', roomSchema);
 

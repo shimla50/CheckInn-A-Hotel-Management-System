@@ -24,26 +24,27 @@ export const AuthProvider = ({ children }) => {
    * Check if user is authenticated on mount
    */
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        try {
-          const response = await api.get('/users/me');
-          const userData = response.data.data.user;
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-          localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        } catch (error) {
-          // Token invalid, clear it
+  const checkAuth = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      try {
+        const response = await api.get('/users/me');
+        const userData = response.data.data?.user || response.data.data;
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+      } catch (error) {
+        setUser(null);
+        if (error.response?.status === 401) {
           localStorage.removeItem('accessToken');
-          setUser(null);
         }
       }
-      setLoading(false);
-    };
+    }
+    setLoading(false);
+  };
 
-    checkAuth();
-  }, []);
+  checkAuth();
+}, []);
+
 
   /**
    * Login function
@@ -55,6 +56,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { user, accessToken } = response.data.data;
+      console.log("LOGIN RESPONSE DATA:", response.data);
+
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
@@ -83,6 +86,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData);
       const { user, accessToken } = response.data.data;
+      console.log("REGISTER RESPONSE DATA:", response.data);
+
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('user', JSON.stringify(user));

@@ -15,6 +15,8 @@ import {
   createStaff,
   listStaff,
   listPayments,
+  sendCheckInReminders,
+  sendPromotionEmails,
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -81,6 +83,20 @@ router.get('/staff', protect, authorize('admin'), listStaff);
  * @access Private (Admin only)
  */
 router.get('/payments', protect, authorize('admin'), listPayments);
+
+/**
+ * @route POST /api/admin/notifications/send-checkin-reminders
+ * @desc Send check-in reminders for tomorrow's bookings
+ * @access Private (Admin/Staff)
+ */
+router.post('/notifications/send-checkin-reminders', protect, authorize('admin', 'staff'), sendCheckInReminders);
+
+/**
+ * @route POST /api/admin/notifications/send-promotion
+ * @desc Send promotion email to customers
+ * @access Private (Admin only)
+ */
+router.post('/notifications/send-promotion', protect, authorize('admin'), sendPromotionEmails);
 
 export default router;
 

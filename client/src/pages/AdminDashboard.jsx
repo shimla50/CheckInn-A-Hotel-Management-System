@@ -2,7 +2,7 @@
  * @fileoverview Admin dashboard page
  * @module pages/AdminDashboard
  */
-
+import '../styles/Theme.css';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -43,75 +43,114 @@ const AdminDashboard = () => {
   }, [user]);
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <p>Welcome, {user?.name}!</p>
-      </div>
-      <div className="dashboard-content">
-        <div className="dashboard-card">
-          <h2>Admin Features</h2>
-          <ul className="feature-list">
-            <li>
-              <Link to="/admin/users">Manage all users (Admin, Staff, Customers)</Link>
-            </li>
-            <li>
-              <Link to="/admin/rooms">Manage rooms and room types</Link>
-            </li>
-            <li>
-              <Link to="/admin/bookings">View all bookings across the system</Link>
-            </li>
-            <li>
-              <Link to="/admin/reports">Generate comprehensive reports</Link>
-            </li>
-            <li>
-              <Link to="/admin/feedback">Handle customer feedback and responses</Link>
-            </li>
-            <li>
-              <Link to="/admin/settings">System settings and configuration</Link>
-            </li>
-            <li>
-              <Link to="/admin/staff">Manage staff accounts</Link>
-            </li>
-            <li>
-              <Link to="/admin/payments">View payment transactions</Link>
-            </li>
-          </ul>
+    <div className="app-page">
+      <header className="page-header">
+        <div>
+         <h1 className="page-title">admin dashboard</h1>
+         <p className="page-subtitle">welcome, {user?.name || "admin"} — manage rooms, bookings, and guests.</p>
         </div>
-        <div className="dashboard-card">
-          <h2>Quick Stats</h2>
-          {loading ? (
-            <div className="loading-state">
-              <Loader />
-              <p>Loading statistics...</p>
-            </div>
-          ) : error ? (
-            <div className="error-state">
-              <p>{error}</p>
-            </div>
-          ) : (
-            <div className="stats-grid">
-              <div className="stat-item">
-                <div className="stat-value">{stats.totalUsers}</div>
-                <div className="stat-label">Total Users</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{stats.totalRooms}</div>
-                <div className="stat-label">Total Rooms</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{stats.activeBookings}</div>
-                <div className="stat-label">Active Bookings</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{formatCurrency(stats.totalRevenue)}</div>
-                <div className="stat-label">Revenue</div>
-              </div>
-            </div>
-          )}
+
+        <div className="page-actions">
+         <Link className="btn-primary" to="/admin/rooms">manage rooms</Link>
+         <Link className="btn-secondary" to="/admin/bookings">view bookings</Link>
         </div>
-      </div>
+      </header>
+
+      <section className="page-content">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '18px' }}>
+        <div className="card">
+          <div className="card-body" style={{ textAlign: 'center' }}>
+            <div style={{ color: '#0f2c44', fontWeight: 800, textTransform: 'capitalize', fontSize: '12px', opacity: 0.9 }}>total users</div>
+            <div style={{ marginTop: '10px', fontSize: '38px', fontWeight: 900, color: '#0b1b2a' }}>{stats?.totalUsers ?? 0}</div>
+            <div style={{ marginTop: '6px', color: '#2b3b4a', fontSize: '12px', textTransform: 'capitalize', opacity: 0.9 }}>admins • staff • customers</div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body" style={{ textAlign: 'center' }}>
+            <div style={{ color: '#0f2c44', fontWeight: 800, textTransform: 'capitalize', fontSize: '12px', opacity: 0.9 }}>total rooms</div>
+            <div style={{ marginTop: '10px', fontSize: '38px', fontWeight: 900, color: '#0b1b2a' }}>{stats?.totalRooms ?? 0}</div>
+            <div style={{ marginTop: '6px', color: '#2b3b4a', fontSize: '12px', textTransform: 'capitalize', opacity: 0.9 }}>inventory overview</div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body" style={{ textAlign: 'center' }}>
+            <div style={{ color: '#0f2c44', fontWeight: 800, textTransform: 'capitalize', fontSize: '12px', opacity: 0.9 }}>active bookings</div>
+            <div style={{ marginTop: '10px', fontSize: '38px', fontWeight: 900, color: '#0b1b2a' }}>{stats?.activeBookings ?? 0}</div>
+            <div style={{ marginTop: '6px', color: '#2b3b4a', fontSize: '12px', textTransform: 'capitalize', opacity: 0.9 }}>today & upcoming</div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body" style={{ textAlign: 'center' }}>
+            <div style={{ color: '#0f2c44', fontWeight: 800, textTransform: 'capitalize', fontSize: '12px', opacity: 0.9 }}>total revenue</div>
+            <div style={{ marginTop: '10px', fontSize: '38px', fontWeight: 900, color: '#0b1b2a' }}>{formatCurrency(stats?.totalRevenue ?? 0)}</div>
+            <div style={{ marginTop: '6px', color: '#2b3b4a', fontSize: '12px', textTransform: 'capitalize', opacity: 0.9 }}>billing summary</div>
+          </div>
+        </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>👥</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>user management</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>manage admins, staff, and customers.</div>
+    <Link className="btn-primary" to="/admin/users" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>🛏️</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>rooms & inventory</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>add rooms, types, pricing, and status.</div>
+    <Link className="btn-primary" to="/admin/rooms" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>📅</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>bookings</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>monitor reservations across the system.</div>
+    <Link className="btn-primary" to="/admin/bookings" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>💬</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>feedback</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>reply to customer feedback & requests.</div>
+    <Link className="btn-primary" to="/admin/feedback" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>📊</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>revenue reports</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>view revenue, occupancy, and analytics.</div>
+    <Link className="btn-primary" to="/admin/reports" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>💰</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>payments</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>view all payment transactions and history.</div>
+    <Link className="btn-primary" to="/admin/payments" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>⚙️</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>settings</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>configure system settings and notifications.</div>
+    <Link className="btn-primary" to="/admin/settings" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+
+  <div className="card-glass">
+    <div style={{ fontSize: '22px', width: '42px', height: '42px', display: 'grid', placeItems: 'center', borderRadius: '12px', background: 'rgba(212,175,55,0.18)', border: '1px solid rgba(212,175,55,0.25)' }}>🔧</div>
+    <div style={{ marginTop: '12px', fontWeight: 900, textTransform: 'capitalize', fontSize: '16px' }}>services</div>
+    <div style={{ marginTop: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '13px', lineHeight: '1.5', textTransform: 'capitalize' }}>manage additional services (laundry, meals, etc.).</div>
+    <Link className="btn-primary" to="/admin/services" style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', padding: '8px 12px' }}>open</Link>
+  </div>
+        </div>
+      </section>
     </div>
+
   );
 };
 

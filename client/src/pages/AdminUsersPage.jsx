@@ -4,10 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import api from '../services/api';
 import Loader from '../components/Loader';
+import '../styles/Theme.css';
 import './AdminUsersPage.css';
 
 const AdminUsersPage = () => {
@@ -35,8 +37,11 @@ const AdminUsersPage = () => {
       if (filters.isActive !== '') params.append('isActive', filters.isActive);
 
       const response = await api.get(`/admin/users?${params.toString()}`);
-      setUsers(response.data.data.users || []);
+      // Handle response structure: response.data.data.users
+      const usersData = response.data?.data?.users || response.data?.users || [];
+      setUsers(usersData);
       setError('');
+      console.log('Fetched users:', usersData.length, 'users'); // Debug log
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch users');
     } finally {
@@ -81,13 +86,23 @@ const AdminUsersPage = () => {
   }
 
   return (
-    <div className="admin-users-page">
-      <div className="page-header">
-        <h1>User Management</h1>
-      </div>
+    <div className="app-page">
+      <header className="page-header">
+        <div>
+          <h1 className="page-title">user management</h1>
+          <p className="page-subtitle">manage users, roles, and account status.</p>
+        </div>
+        <div className="page-actions">
+          <Link className="btn-secondary" to="/admin/dashboard">
+            back to dashboard
+          </Link>
+        </div>
+      </header>
 
-      <div className="filters-section">
-        <h3>Filters</h3>
+      <section className="page-content">
+        <div className="card">
+          <div className="card-header">Filters</div>
+          <div className="card-body">
         <div className="filters-grid">
           <div className="form-group">
             <label>Role</label>
@@ -113,18 +128,21 @@ const AdminUsersPage = () => {
             </select>
           </div>
           <button
-            className="btn-clear"
+            className="btn-secondary"
             onClick={() => setFilters({ role: '', isActive: '' })}
           >
             Clear Filters
           </button>
         </div>
-      </div>
+          </div>
+        </div>
 
-      {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">{error}</div>}
 
-      <div className="users-table-container">
-        <table className="users-table">
+        <div className="card">
+          <div className="card-body">
+            <div className="table-container">
+              <table className="table">
           <thead>
             <tr>
               <th>Name</th>
@@ -167,9 +185,10 @@ const AdminUsersPage = () => {
                   <td>{formatDate(userItem.createdAt)}</td>
                   <td>
                     <button
-                      className={`btn-status ${userItem.isActive ? 'btn-deactivate' : 'btn-activate'}`}
+                      className={userItem.isActive ? 'btn-danger' : 'btn-primary'}
                       onClick={() => handleStatusChange(userItem._id || userItem.id, userItem.isActive)}
                       disabled={userItem._id === user?.id || userItem.id === user?.id}
+                      style={{ fontSize: '12px', padding: '6px 10px' }}
                     >
                       {userItem.isActive ? 'Deactivate' : 'Activate'}
                     </button>
@@ -179,7 +198,10 @@ const AdminUsersPage = () => {
             )}
           </tbody>
         </table>
-      </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

@@ -4,9 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import Loader from '../components/Loader';
 import formatCurrency from '../utils/formatCurrency';
+import { getRoomImage, getRoomDescription } from '../utils/roomImages';
+import '../styles/Theme.css';
 import './CustomerRoomsSearchPage.css';
 
 const CustomerRoomsSearchPage = () => {
@@ -132,13 +135,23 @@ const CustomerRoomsSearchPage = () => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="customer-rooms-search-page">
-      <div className="page-header">
-        <h1>Search Rooms</h1>
-      </div>
+    <div className="app-page">
+      <header className="page-header">
+        <div>
+          <h1 className="page-title">search rooms</h1>
+          <p className="page-subtitle">check availability & book a room.</p>
+        </div>
+        <div className="page-actions">
+          <Link className="btn-secondary" to="/customer/dashboard">
+            back to dashboard
+          </Link>
+        </div>
+      </header>
 
-      <div className="search-filters-card">
-        <h2>Search Filters</h2>
+      <section className="page-content">
+        <div className="card">
+          <div className="card-header">Search Filters</div>
+          <div className="card-body">
         <form onSubmit={handleSearch}>
           <div className="filters-grid">
             <div className="form-group">
@@ -215,7 +228,7 @@ const CustomerRoomsSearchPage = () => {
             </div>
           </div>
 
-          <div className="filter-actions">
+          <div style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
             <button type="submit" className="btn-primary">
               Search Rooms
             </button>
@@ -229,80 +242,92 @@ const CustomerRoomsSearchPage = () => {
             </button>
             <button
               type="button"
-              className="btn-clear"
+              className="btn-secondary"
               onClick={handleClearFilters}
             >
               Clear Filters
             </button>
           </div>
         </form>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-      {successMessage && <div className="success-message">{successMessage}</div>}
-
-      {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <div className="results-header">
-            <h2>Available Rooms ({rooms.length})</h2>
           </div>
+        </div>
 
-          {rooms.length === 0 ? (
-            <div className="empty-state">
-              <p>No rooms found matching your criteria.</p>
-              <p>Try adjusting your filters or check back later.</p>
-            </div>
-          ) : (
-            <div className="rooms-grid">
-              {rooms.map((room) => (
-                <div key={room._id || room.id} className="room-card">
-                  <div className="room-header">
-                    <h3>{room.code}</h3>
-                    <span className={`status-badge status-${room.status}`}>
-                      {room.status}
-                    </span>
-                  </div>
-                  <div className="room-details">
-                    <p className="room-type">
-                      <strong>Type:</strong> {room.type}
-                    </p>
-                    <p className="room-price">
-                      <strong>Price:</strong>{' '}
-                      {formatCurrency(room.pricePerNight)}/night
-                    </p>
-                    <p>
-                      <strong>Max Guests:</strong> {room.maxGuests}
-                    </p>
-                    {room.amenities && room.amenities.length > 0 && (
-                      <div className="amenities-list">
-                        <strong>Amenities:</strong>
-                        <ul>
-                          {room.amenities.map((amenity, index) => (
-                            <li key={index}>{amenity}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  <div className="room-actions">
-                    <button
-                      className="btn-book"
-                      onClick={() => handleBookRoom(room._id || room.id)}
-                      disabled={bookingRoomId === (room._id || room.id)}
-                    >
-                      {bookingRoomId === (room._id || room.id)
-                        ? 'Booking...'
-                        : 'Book Now'}
-                    </button>
-                  </div>
+        {error && <div className="error-message">{error}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
+
+        {loading ? (
+          <Loader />
+        ) : (
+          <div className="card">
+            <div className="card-header">Available Rooms ({rooms.length})</div>
+            <div className="card-body">
+              {rooms.length === 0 ? (
+                <div className="empty-state">
+                  <p>No rooms found matching your criteria.</p>
+                  <p>Try adjusting your filters or check back later.</p>
                 </div>
-              ))}
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '18px' }}>
+                  {rooms.map((room) => (
+                    <div key={room._id || room.id} className="card">
+                      <div className="card-body">
+                        <div style={{ marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <h3 style={{ margin: 0, fontWeight: 900, textTransform: 'uppercase', color: '#0b1b2a' }}>{room.code}</h3>
+                            <span style={{ 
+                              padding: '6px 10px', 
+                              borderRadius: '8px', 
+                              fontSize: '12px', 
+                              fontWeight: 800, 
+                              textTransform: 'capitalize',
+                              background: room.status === 'available' ? 'rgba(39,174,96,0.16)' : room.status === 'booked' ? 'rgba(243,156,18,0.16)' : 'rgba(231,76,60,0.16)',
+                              color: room.status === 'available' ? '#27ae60' : room.status === 'booked' ? '#f39c12' : '#e74c3c'
+                            }}>
+                              {room.status}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                            <p style={{ margin: '4px 0' }}><strong>Type:</strong> {room.type}</p>
+                            <p style={{ margin: '4px 0' }}><strong>Price:</strong> {formatCurrency(room.pricePerNight)}/night</p>
+                            <p style={{ margin: '4px 0' }}><strong>Max Guests:</strong> {room.maxGuests}</p>
+                            {room.amenities && room.amenities.length > 0 && (
+                              <div style={{ marginTop: '8px' }}>
+                                <strong>Free Amenities:</strong>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                                  {room.amenities.slice(0, 4).map((amenity, index) => (
+                                    <span key={index} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(212,175,55,0.16)', fontSize: '12px' }}>{amenity}</span>
+                                  ))}
+                                  {room.amenities.length > 4 && (
+                                    <span style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(212,175,55,0.16)', fontSize: '12px' }}>+{room.amenities.length - 4} more</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ marginTop: '12px' }}>
+                          <button
+                            className="btn-primary"
+                            onClick={() => handleBookRoom(room._id || room.id)}
+                            disabled={bookingRoomId === (room._id || room.id) || room.status !== 'available'}
+                            style={{ width: '100%' }}
+                          >
+                            {bookingRoomId === (room._id || room.id)
+                              ? 'Booking...'
+                              : room.status === 'available'
+                              ? 'Book Now'
+                              : 'Not Available'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </>
-      )}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

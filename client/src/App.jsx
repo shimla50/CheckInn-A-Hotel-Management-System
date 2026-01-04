@@ -31,6 +31,8 @@ import BillingPage from './pages/BillingPage';
 import AdminReportsDashboard from './pages/AdminReportsDashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedbackPage';
 import NotFound from './pages/NotFound';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import './App.css';
 
 const App = () => {
@@ -43,6 +45,8 @@ const App = () => {
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Protected dashboard routes */}
             <Route
@@ -148,7 +152,7 @@ const App = () => {
             <Route
               path="/customer/rooms"
               element={
-                <ProtectedRoute allowedRoles={['customer']}>
+                <ProtectedRoute allowedRoles={['customer', 'staff', 'admin']}>
                   <CustomerRoomsSearchPage />
                 </ProtectedRoute>
               }

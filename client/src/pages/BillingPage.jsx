@@ -8,6 +8,10 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Loader from '../components/Loader';
 import formatCurrency from '../utils/formatCurrency';
+import bkashIcon from '../assets/payments/bkash.svg';
+import rocketIcon from '../assets/payments/rocket.svg';
+import nagadIcon from '../assets/payments/nagad.svg';
+import bankIcon from '../assets/payments/bank.svg';
 import './BillingPage.css';
 
 const BillingPage = () => {
@@ -24,6 +28,7 @@ const BillingPage = () => {
     paymentMethod: 'cash',
     transactionId: '',
   });
+  const [processingPayment, setProcessingPayment] = useState(null); // Track which payment method is being processed
 
   useEffect(() => {
     if (user && ['staff', 'admin'].includes(user.role)) {
@@ -120,6 +125,31 @@ const BillingPage = () => {
 
   const handlePrintInvoice = () => {
     window.print();
+  };
+
+  const handleLocalPayment = async (method) => {
+    if (!selectedBooking) {
+      setError('Please select a booking first');
+      return;
+    }
+
+    try {
+      setProcessingPayment(method);
+      setError('');
+      
+      const response = await api.post(`/billing/pay/${selectedBooking}`, { method });
+      
+      // Show success message
+      alert(`Payment completed successfully with ${method} (demo)`);
+      
+      // Refresh invoice
+      await handleViewInvoice(selectedBooking);
+      
+      setProcessingPayment(null);
+    } catch (err) {
+      setError(err.response?.data?.message || `Failed to process ${method} payment`);
+      setProcessingPayment(null);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -248,10 +278,15 @@ const BillingPage = () => {
                     >
                       <option value="cash">Cash</option>
                       <option value="card">Card</option>
+                      <option value="bkash">bKash</option>
+                      <option value="rocket">Rocket</option>
+                      <option value="nagad">Nagad</option>
+                      <option value="bank">Bank</option>
                       <option value="online">Online</option>
+                      <option value="sslcommerz">SSL Commerz</option>
                     </select>
                   </div>
-                  {paymentData.paymentMethod === 'online' && (
+                  {(paymentData.paymentMethod === 'online' || paymentData.paymentMethod === 'sslcommerz') && (
                     <div className="form-group">
                       <label>Transaction ID (optional)</label>
                       <input
@@ -373,6 +408,52 @@ const BillingPage = () => {
                   </div>
                 </div>
 
+                {/* Local Payment Methods */}
+                {invoice.paymentSummary.balanceDue > 0 && (
+                  <div className="local-payment-methods">
+                    <h3>Pay with Local Payment Methods</h3>
+                    <div className="payment-buttons-grid">
+                      <button
+                        className="payment-method-btn"
+                        onClick={() => handleLocalPayment('bkash')}
+                        disabled={loading || processingPayment !== null}
+                      >
+                        <img src={bkashIcon} alt="bKash" className="payment-icon" />
+                        <span>Pay with bKash</span>
+                        {processingPayment === 'bkash' && <span className="processing">Processing...</span>}
+                      </button>
+                      <button
+                        className="payment-method-btn"
+                        onClick={() => handleLocalPayment('rocket')}
+                        disabled={loading || processingPayment !== null}
+                      >
+                        <img src={rocketIcon} alt="Rocket" className="payment-icon" />
+                        <span>Pay with Rocket</span>
+                        {processingPayment === 'rocket' && <span className="processing">Processing...</span>}
+                      </button>
+                      <button
+                        className="payment-method-btn"
+                        onClick={() => handleLocalPayment('nagad')}
+                        disabled={loading || processingPayment !== null}
+                      >
+                        <img src={nagadIcon} alt="Nagad" className="payment-icon" />
+                        <span>Pay with Nagad</span>
+                        {processingPayment === 'nagad' && <span className="processing">Processing...</span>}
+                      </button>
+                      <button
+                        className="payment-method-btn"
+                        onClick={() => handleLocalPayment('bank')}
+                        disabled={loading || processingPayment !== null}
+                      >
+                        <img src={bankIcon} alt="Bank" className="payment-icon" />
+                        <span>Pay with Bank</span>
+                        {processingPayment === 'bank' && <span className="processing">Processing...</span>}
+                      </button>
+                    </div>
+                    <p className="payment-note">These are demo payments. No real transactions will be processed.</p>
+                  </div>
+                )}
+
                 {invoice.payments && invoice.payments.length > 0 && (
                   <div className="payment-history">
                     <h3>Payment History</h3>
@@ -429,4 +510,3 @@ const BillingPage = () => {
 };
 
 export default BillingPage;
-

@@ -141,6 +141,7 @@ const AdminPaymentsPage = () => {
               <option value="cash">Cash</option>
               <option value="card">Card</option>
               <option value="online">Online</option>
+              <option value="sslcommerz">SSL Commerz</option>
             </select>
           </div>
           <div className="form-group">

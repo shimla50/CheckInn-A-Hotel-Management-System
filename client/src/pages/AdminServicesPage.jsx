@@ -4,10 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Loader from '../components/Loader';
 import formatCurrency from '../utils/formatCurrency';
+import '../styles/Theme.css';
 import './AdminServicesPage.css';
 
 const AdminServicesPage = () => {
@@ -127,22 +129,33 @@ const AdminServicesPage = () => {
   }
 
   return (
-    <div className="admin-services-page">
-      <div className="page-header">
-        <h1>Service Management</h1>
-        <button
-          className="btn-primary"
-          onClick={() => setShowForm(true)}
-          disabled={showForm}
-        >
-          Add New Service
-        </button>
-      </div>
+    <div className="app-page">
+      <header className="page-header">
+        <div>
+          <h1 className="page-title">service management</h1>
+          <p className="page-subtitle">manage additional services (laundry, meals, etc.).</p>
+        </div>
+        <div className="page-actions">
+          <button
+            className="btn-primary"
+            onClick={() => setShowForm(true)}
+            disabled={showForm}
+          >
+            add new service
+          </button>
+          <Link className="btn-secondary" to="/admin/dashboard">
+            back to dashboard
+          </Link>
+        </div>
+      </header>
 
-      {error && <div className="error-message">{error}</div>}
+      <section className="page-content">
+        {error && <div className="error-message">{error}</div>}
 
-      {showForm && (
-        <div className="service-form-card">
+        {showForm && (
+          <div className="card">
+            <div className="card-header">{editingService ? 'Edit Service' : 'Create New Service'}</div>
+            <div className="card-body">
           <h2>{editingService ? 'Edit Service' : 'Create New Service'}</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -194,7 +207,7 @@ const AdminServicesPage = () => {
               </label>
             </div>
 
-            <div className="form-actions">
+            <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
               <button type="submit" className="btn-primary">
                 {editingService ? 'Update Service' : 'Create Service'}
               </button>
@@ -207,47 +220,62 @@ const AdminServicesPage = () => {
               </button>
             </div>
           </form>
-        </div>
-      )}
+            </div>
+          </div>
+        )}
 
-      <div className="services-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '18px' }}>
         {services.length === 0 ? (
-          <p className="empty-state">No services found. Create your first service!</p>
+          <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
+            <div className="card-body">
+              <p className="empty-state">No services found. Create your first service!</p>
+            </div>
+          </div>
         ) : (
           services.map((service) => (
-            <div key={service._id || service.id} className="service-card">
-              <div className="service-header">
-                <h3>{service.name}</h3>
-                <span
-                  className={`status-badge ${
-                    service.isActive ? 'status-active' : 'status-inactive'
-                  }`}
-                >
-                  {service.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-              {service.description && (
-                <p className="service-description">{service.description}</p>
-              )}
-              <div className="service-price">{formatCurrency(service.price)}</div>
-              <div className="service-actions">
-                <button
-                  className="btn-edit"
-                  onClick={() => handleEdit(service)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn-delete"
-                  onClick={() => handleDelete(service._id || service.id)}
-                >
-                  Delete
-                </button>
+            <div key={service._id || service.id} className="card">
+              <div className="card-body">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <h3 style={{ margin: 0, fontWeight: 900, textTransform: 'capitalize', color: '#0b1b2a' }}>{service.name}</h3>
+                  <span
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      background: service.isActive ? 'rgba(39,174,96,0.16)' : 'rgba(231,76,60,0.16)',
+                      color: service.isActive ? '#27ae60' : '#e74c3c'
+                    }}
+                  >
+                    {service.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                {service.description && (
+                  <p style={{ margin: '8px 0', color: '#0b1b2a', fontSize: '14px' }}>{service.description}</p>
+                )}
+                <div style={{ margin: '12px 0', fontWeight: 900, fontSize: '18px', color: '#0b1b2a' }}>{formatCurrency(service.price)}</div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button
+                    className="btn-primary"
+                    onClick={() => handleEdit(service)}
+                    style={{ fontSize: '14px', padding: '8px 12px' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn-danger"
+                    onClick={() => handleDelete(service._id || service.id)}
+                    style={{ fontSize: '14px', padding: '8px 12px' }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))
         )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

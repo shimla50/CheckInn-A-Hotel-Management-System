@@ -51,6 +51,7 @@ router.use('/bookings', bookingRoutes);
 
 // Billing routes
 router.use('/billing', billingRoutes);
+//router.use('/payments', paymentRoutes);
 
 // Admin routes
 router.use('/admin', adminRoutes);
@@ -71,4 +72,3 @@ router.use('/feedback', feedbackRoutes);
 router.use('/service-usage', serviceUsageRoutes);
 
 export default router;
-

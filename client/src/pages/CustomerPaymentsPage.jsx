@@ -76,6 +76,17 @@ const CustomerPaymentsPage = () => {
     }
   };
 
+  const formatPaymentMethod = (method) => {
+    if (!method) return 'N/A';
+    // Handle special cases
+    if (method === 'sslcommerz-demo') return 'SSLCommerz (Demo)';
+    // Capitalize first letter and handle camelCase
+    return method
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  };
+
   if (user?.role !== 'customer') {
     return <div className="customer-only">Customer access required</div>;
   }
@@ -184,7 +195,7 @@ const CustomerPaymentsPage = () => {
                           <td className="amount">{formatCurrency(payment.amount)}</td>
                           <td>
                             <span className={`method-badge method-${payment.paymentMethod}`}>
-                              {payment.paymentMethod}
+                              {formatPaymentMethod(payment.paymentMethod)}
                             </span>
                           </td>
                           <td>
@@ -216,4 +227,3 @@ const CustomerPaymentsPage = () => {
 };
 
 export default CustomerPaymentsPage;
-

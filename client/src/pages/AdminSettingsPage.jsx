@@ -22,6 +22,13 @@ const AdminSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [sendingReminders, setSendingReminders] = useState(false);
+  const [sendingPromotion, setSendingPromotion] = useState(false);
+  const [promotionData, setPromotionData] = useState({
+    title: '',
+    message: '',
+    filterByPastBookings: false,
+  });
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -73,6 +80,79 @@ const AdminSettingsPage = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSendReminders = async () => {
+    if (!window.confirm('Send check-in reminders to all guests with bookings tomorrow?')) {
+      return;
+    }
+
+    setSendingReminders(true);
+    setError('');
+
+    try {
+      const response = await api.post('/admin/notifications/send-checkin-reminders');
+      const { sent, failed, total } = response.data.data;
+      showNotification(
+        `Reminders sent: ${sent} successful, ${failed} failed out of ${total} total`,
+        sent > 0 ? 'success' : 'error'
+      );
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to send reminders';
+      setError(errorMsg);
+      showNotification(errorMsg, 'error');
+    } finally {
+      setSendingReminders(false);
+    }
+  };
+
+  const handleSendPromotion = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!promotionData.title || !promotionData.message) {
+      setError('Title and message are required');
+      showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Send promotion email to ${promotionData.filterByPastBookings ? 'customers with past bookings' : 'all customers'}?`)) {
+      return;
+    }
+
+    setSendingPromotion(true);
+
+    try {
+      const response = await api.post('/admin/notifications/send-promotion', {
+        title: promotionData.title,
+        message: promotionData.message,
+        filterByPastBookings: promotionData.filterByPastBookings,
+      });
+      const { sent, failed, total } = response.data.data;
+      showNotification(
+        `Promotion emails sent: ${sent} successful, ${failed} failed out of ${total} total`,
+        sent > 0 ? 'success' : 'error'
+      );
+      setPromotionData({
+        title: '',
+        message: '',
+        filterByPastBookings: false,
+      });
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to send promotion emails';
+      setError(errorMsg);
+      showNotification(errorMsg, 'error');
+    } finally {
+      setSendingPromotion(false);
+    }
+  };
+
+  const handlePromotionInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setPromotionData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   if (user?.role !== 'admin') {
@@ -178,6 +258,94 @@ const AdminSettingsPage = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Email Notifications Section */}
+      <div className="settings-form-container" style={{ marginTop: '30px' }}>
+        <div className="form-section">
+          <h3>Email Notifications</h3>
+          
+          {/* Check-in Reminders */}
+          <div style={{ marginBottom: '30px', padding: '20px', background: '#f9f9f9', borderRadius: '8px' }}>
+            <h4 style={{ marginTop: 0 }}>Check-in Reminders</h4>
+            <p style={{ color: '#666', marginBottom: '15px' }}>
+              Send check-in reminder emails to all guests with bookings scheduled for tomorrow.
+            </p>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleSendReminders}
+              disabled={sendingReminders}
+              style={{ minWidth: '200px' }}
+            >
+              {sendingReminders ? 'Sending...' : 'Send Check-in Reminders'}
+            </button>
+          </div>
+
+          {/* Promotion Emails */}
+          <div style={{ padding: '20px', background: '#f9f9f9', borderRadius: '8px' }}>
+            <h4 style={{ marginTop: 0 }}>Promotion Emails</h4>
+            <p style={{ color: '#666', marginBottom: '20px' }}>
+              Send promotional emails to customers. You can choose to send to all customers or only those with past bookings.
+            </p>
+            <form onSubmit={handleSendPromotion}>
+              <div className="form-group">
+                <label htmlFor="promotionTitle">
+                  Promotion Title *
+                </label>
+                <input
+                  type="text"
+                  id="promotionTitle"
+                  name="title"
+                  value={promotionData.title}
+                  onChange={handlePromotionInputChange}
+                  placeholder="e.g., Special Summer Offer"
+                  required
+                  style={{ width: '100%', padding: '10px', marginTop: '5px' }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="promotionMessage">
+                  Promotion Message *
+                </label>
+                <textarea
+                  id="promotionMessage"
+                  name="message"
+                  value={promotionData.message}
+                  onChange={handlePromotionInputChange}
+                  placeholder="Enter your promotion message here..."
+                  required
+                  rows="5"
+                  style={{ width: '100%', padding: '10px', marginTop: '5px', fontFamily: 'inherit' }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    name="filterByPastBookings"
+                    checked={promotionData.filterByPastBookings}
+                    onChange={handlePromotionInputChange}
+                    style={{ marginRight: '10px', cursor: 'pointer' }}
+                  />
+                  <span>Only send to customers with past bookings</span>
+                </label>
+              </div>
+
+              <div className="form-actions">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={sendingPromotion}
+                >
+                  {sendingPromotion ? 'Sending...' : 'Send Promotion Emails'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

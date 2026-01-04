@@ -31,23 +31,53 @@ The app will be available at `http://localhost:3000`
 client/
 ├── src/
 │   ├── components/      # Reusable components
+│   │   ├── Loader.css
+│   │   ├── Loader.jsx
+│   │   ├── Navbar.css
 │   │   ├── Navbar.jsx
 │   │   ├── ProtectedRoute.jsx
-│   │   └── Loader.jsx
+│   │   ├── StayCard.css
+│   │   ├── StayCard.jsx
+│   │   ├── Toast.css
+│   │   ├── Toast.jsx
+│   │   └── ToastContainer.jsx
 │   ├── context/         # React Context
-│   │   └── AuthContext.jsx
+│   │   ├── AuthContext.jsx
+│   │   └── NotificationContext.jsx
 │   ├── pages/           # Page components
-│   │   ├── Login.jsx
-│   │   ├── Register.jsx
+│   │   ├── AdminBookingsPage.css
+│   │   ├── AdminBookingsPage.jsx
 │   │   ├── AdminDashboard.jsx
-│   │   ├── StaffDashboard.jsx
-│   │   ├── CustomerDashboard.jsx
-│   │   └── NotFound.jsx
+│   │   ├── AdminFeedbackManagement.css
+│   │   ├── AdminFeedbackManagement.jsx
+│   │   ├── AdminPaymentsPage.css
+│   │   ├── AdminPaymentsPage.jsx
+│   │   ├── AdminReportsDashboard.css
+│   │   ├── AdminReportsDashboard.jsx
+│   │   ├── AdminRoomsPage.css
+│   │   ├── AdminRoomsPage.jsx
+│   │   ├── AdminServicesPage.css
+│   │   ├── AdminServicesPage.jsx
+│   │   ├── AdminSettingsPage.css
+│   │   ├── AdminSettingsPage.jsx
+│   │   ├── AdminStaffAccountsPage.css
+│   │   ├── AdminStaffAccountsPage.jsx
+│   │   ├── AdminUsersPage.css
+│   │   ├── AdminUsersPage.jsx
+│   │   ├── Auth.css
+│   │   ├── BillingPage.css
+│   │   ├── BillingPage.jsx
+│   │   ├── CustomerBookingPage.css
+│   │   ├── CustomerBookingPage.jsx
+│   │   └── ... (additional pages)
 │   ├── services/        # API services
-│   │   └── api.js
+│   │   └── ... (API service files)
+│   ├── utils/           # Helper utilities
+│   │   └── ... (utility files)
+│   ├── App.css
 │   ├── App.jsx          # Main app component with routing
-│   ├── main.jsx         # Entry point
-│   └── index.css        # Global styles
+│   ├── index.css        # Global styles
+│   └── main.jsx         # Entry point
 ├── index.html
 ├── vite.config.js
 └── package.json

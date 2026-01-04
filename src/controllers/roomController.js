@@ -215,27 +215,20 @@ export const listRooms = async (req, res, next) => {
       }
     }
 
-    // Pagination
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;
-
-    // Execute query
+    // Execute query - return all rooms (no pagination)
     const rooms = await Room.find(filter)
-      .skip(skip)
-      .limit(limitNum)
       .sort({ createdAt: -1 });
 
-    const total = await Room.countDocuments(filter);
+    const total = rooms.length;
 
     res.status(200).json(
       successResponse('Rooms retrieved successfully', {
         rooms,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: 1,
+          limit: total,
           total,
-          pages: Math.ceil(total / limitNum),
+          pages: 1,
         },
       }, 200)
     );

@@ -4,10 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Loader from '../components/Loader';
 import formatCurrency from '../utils/formatCurrency';
+import '../styles/Theme.css';
 import './AdminRoomsPage.css';
 
 const AdminRoomsPage = () => {
@@ -17,11 +19,14 @@ const AdminRoomsPage = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+  // Default free amenities included with all rooms
+  const DEFAULT_FREE_AMENITIES = ['Breakfast', 'WiFi', 'Air Conditioning', 'TV', 'Room Service'];
+  
   const [formData, setFormData] = useState({
     code: '',
     type: 'single',
     pricePerNight: '',
-    amenities: '',
+    amenities: DEFAULT_FREE_AMENITIES.join(', '), // Default includes breakfast
     status: 'available',
     maxGuests: '',
   });
@@ -83,10 +88,11 @@ const AdminRoomsPage = () => {
         code: '',
         type: 'single',
         pricePerNight: '',
-        amenities: '',
+        amenities: DEFAULT_FREE_AMENITIES.join(', '), // Default includes breakfast
         status: 'available',
         maxGuests: '',
       });
+      // Refresh rooms list to show new/updated room
       fetchRooms();
     } catch (err) {
       const apiMessage = err.response?.data?.message;
@@ -118,6 +124,9 @@ const AdminRoomsPage = () => {
 
     try {
       await api.delete(`/rooms/${roomId}`);
+      // Remove from local state immediately for instant UI update
+      setRooms((prevRooms) => prevRooms.filter((room) => (room._id || room.id) !== roomId));
+      // Also refetch to ensure consistency
       fetchRooms();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete room');
@@ -146,27 +155,38 @@ const AdminRoomsPage = () => {
   }
 
   return (
-    <div className="admin-rooms-page">
-      <div className="page-header">
-        <h1>Room Management</h1>
-        <button
-          className="btn-primary"
-          onClick={() => setShowForm(true)}
-          disabled={showForm}
-        >
-          Add New Room
-        </button>
-      </div>
+    <div className="app-page">
+      <header className="page-header">
+        <div>
+          <h1 className="page-title">room management</h1>
+          <p className="page-subtitle">manage rooms, types, pricing, and availability.</p>
+        </div>
+        <div className="page-actions">
+          <button
+            className="btn-primary"
+            onClick={() => setShowForm(true)}
+            disabled={showForm}
+          >
+            add new room
+          </button>
+          <Link className="btn-secondary" to="/admin/dashboard">
+            back to dashboard
+          </Link>
+        </div>
+      </header>
 
-      {error && <div className="error-message">{error}</div>}
+      <section className="page-content">
+        {error && <div className="error-message">{error}</div>}
 
-      {showForm && (
-        <div className="room-form-card">
+        {showForm && (
+          <div className="card">
+            <div className="card-header">{editingRoom ? 'Edit Room' : 'Create New Room'}</div>
+            <div className="card-body">
           <h2>{editingRoom ? 'Edit Room' : 'Create New Room'}</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label>Room Code *</label>
+                <label style={{ fontWeight: 800, color: '#0b1b2a', textTransform: 'capitalize' }}>Room Code *</label>
                 <input
                   type="text"
                   name="code"
@@ -218,13 +238,18 @@ const AdminRoomsPage = () => {
             </div>
 
             <div className="form-group">
-              <label>Amenities (comma-separated)</label>
+              <label>
+                Free Amenities (comma-separated) *
+                <span style={{ fontSize: '12px', color: '#666', display: 'block', marginTop: '4px', fontWeight: 'normal' }}>
+                  These are included in room price (e.g., Breakfast, WiFi, TV, AC). Breakfast is included by default.
+                </span>
+              </label>
               <input
                 type="text"
                 name="amenities"
                 value={formData.amenities}
                 onChange={handleInputChange}
-                placeholder="e.g., WiFi, TV, AC, Mini Bar"
+                placeholder="Breakfast, WiFi, TV, AC, Room Service"
               />
             </div>
 
@@ -242,7 +267,7 @@ const AdminRoomsPage = () => {
               </select>
             </div>
 
-            <div className="form-actions">
+            <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
               <button type="submit" className="btn-primary">
                 {editingRoom ? 'Update Room' : 'Create Room'}
               </button>
@@ -255,55 +280,67 @@ const AdminRoomsPage = () => {
               </button>
             </div>
           </form>
-        </div>
-      )}
+            </div>
+          </div>
+        )}
 
-      <div className="rooms-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '18px' }}>
         {rooms.length === 0 ? (
-          <p className="empty-state">No rooms found. Create your first room!</p>
+          <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
+            <div className="card-body">
+              <p className="empty-state">No rooms found. Create your first room!</p>
+            </div>
+          </div>
         ) : (
           rooms.map((room) => (
-            <div key={room._id || room.id} className="room-card">
-              <div className="room-header">
-                <h3>{room.code}</h3>
-                <span className={`status-badge status-${room.status}`}>
-                  {room.status}
-                </span>
+            <div key={room._id || room.id} className="card">
+              <div className="card-body">
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0, fontWeight: 900, textTransform: 'uppercase', color: '#0b1b2a' }}>{room.code}</h3>
+                  <span style={{ 
+                    padding: '6px 10px', 
+                    borderRadius: '8px', 
+                    fontSize: '12px', 
+                    fontWeight: 800, 
+                    textTransform: 'capitalize',
+                    background: room.status === 'available' ? 'rgba(39,174,96,0.16)' : room.status === 'booked' ? 'rgba(243,156,18,0.16)' : 'rgba(231,76,60,0.16)',
+                    color: room.status === 'available' ? '#27ae60' : room.status === 'booked' ? '#f39c12' : '#e74c3c'
+                  }}>
+                    {room.status}
+                  </span>
+                </div>
+                <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                  <p style={{ margin: '4px 0' }}><strong>Type:</strong> {room.type}</p>
+                  <p style={{ margin: '4px 0' }}><strong>Price:</strong> {formatCurrency(room.pricePerNight)}/night</p>
+                  <p style={{ margin: '4px 0' }}><strong>Max Guests:</strong> {room.maxGuests}</p>
+                  {room.amenities && room.amenities.length > 0 && (
+                    <p style={{ margin: '4px 0' }}><strong>Amenities:</strong> {room.amenities.join(', ')}</p>
+                  )}
+                </div>
               </div>
-              <div className="room-details">
-                <p>
-                  <strong>Type:</strong> {room.type}
-                </p>
-                <p>
-                  <strong>Price:</strong> {formatCurrency(room.pricePerNight)}/night
-                </p>
-                <p>
-                  <strong>Max Guests:</strong> {room.maxGuests}
-                </p>
-                {room.amenities && room.amenities.length > 0 && (
-                  <p>
-                    <strong>Amenities:</strong> {room.amenities.join(', ')}
-                  </p>
-                )}
-              </div>
-              <div className="room-actions">
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                 <button
-                  className="btn-edit"
+                  className="btn-primary"
                   onClick={() => handleEdit(room)}
+                  style={{ fontSize: '14px', padding: '8px 12px' }}
                 >
                   Edit
                 </button>
                 <button
-                  className="btn-delete"
+                  className="btn-danger"
                   onClick={() => handleDelete(room._id || room.id)}
+                  style={{ fontSize: '14px', padding: '8px 12px' }}
                 >
                   Delete
                 </button>
               </div>
+              </div>
             </div>
           ))
         )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

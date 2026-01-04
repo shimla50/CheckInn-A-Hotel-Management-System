@@ -27,7 +27,6 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true,
       lowercase: true,
       trim: true,
       match: [
@@ -92,6 +91,12 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Indexes for frequent queries
+userSchema.index({ email: 1 }, { unique: true }); // Unique index on email (already unique, but explicit for performance)
+userSchema.index({ role: 1 }); // Query users by role
+userSchema.index({ isActive: 1 }); // Query active users
+userSchema.index({ role: 1, isActive: 1 }); // Composite index for role + active status queries
 
 const User = mongoose.model('User', userSchema);
 

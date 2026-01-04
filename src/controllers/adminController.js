@@ -9,6 +9,8 @@ import Booking from '../models/Booking.js';
 import Payment from '../models/Payment.js';
 import Settings from '../models/Settings.js';
 import { successResponse, errorResponse } from '../utils/ApiResponse.js';
+import { sendCheckInReminder, sendPromotion } from '../services/notificationService.js';
+// import { sendCheckInReminder, sendPromotion } from '../services/notificationService.js';
 
 /**
  * Get admin summary statistics
@@ -66,26 +68,22 @@ export const listAllUsers = async (req, res, next) => {
       filter.isActive = isActive === 'true';
     }
 
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;
-
+    // Return all users (no pagination)
     const users = await User.find(filter)
       .select('-password')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limitNum);
+      .sort({ createdAt: -1 });
 
-    const total = await User.countDocuments(filter);
+    const total = users.length;
 
     res.status(200).json(
       successResponse('Users retrieved successfully', {
         users,
+        total,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: 1,
+          limit: total,
           total,
-          pages: Math.ceil(total / limitNum),
+          pages: 1,
         },
       }, 200)
     );
@@ -469,6 +467,180 @@ export const listPayments = async (req, res, next) => {
           total,
           pages: Math.ceil(total / limitNum),
         },
+      }, 200)
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Send check-in reminders for bookings with check-in date tomorrow (admin/staff only)
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next function
+ */
+export const sendCheckInReminders = async (req, res, next) => {
+  try {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const dayAfter = new Date(tomorrow);
+    dayAfter.setDate(dayAfter.getDate() + 1);
+
+    // Find all approved bookings with check-in date tomorrow
+    const bookings = await Booking.find({
+      status: { $in: ['approved', 'pending'] },
+      checkInDate: {
+        $gte: tomorrow,
+        $lt: dayAfter,
+      },
+    })
+      .populate('guest', 'name email')
+      .populate('room', 'code type');
+
+    if (bookings.length === 0) {
+      return res.status(200).json(
+        successResponse('No bookings found for tomorrow', {
+          sent: 0,
+          failed: 0,
+          total: 0,
+        }, 200)
+      );
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const results = [];
+
+    // Send reminder to each guest
+    for (const booking of bookings) {
+      try {
+        await sendCheckInReminder(booking.guest, booking);
+        sent++;
+        results.push({
+          bookingId: booking._id,
+          guestEmail: booking.guest.email,
+          status: 'sent',
+        });
+      } catch (error) {
+        failed++;
+        results.push({
+          bookingId: booking._id,
+          guestEmail: booking.guest.email,
+          status: 'failed',
+          error: error.message,
+        });
+        console.error(`Failed to send reminder for booking ${booking._id}:`, error);
+      }
+    }
+
+    res.status(200).json(
+      successResponse('Check-in reminders processed', {
+        sent,
+        failed,
+        total: bookings.length,
+        results,
+      }, 200)
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Send promotion email to customers (admin only)
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next function
+ */
+export const sendPromotionEmails = async (req, res, next) => {
+  try {
+    const { title, message, details, filterByPastBookings } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json(
+        errorResponse('Title and message are required', null, 400)
+      );
+    }
+
+    // Build user filter
+    const userFilter = { role: 'customer', isActive: true };
+
+    // If filterByPastBookings is true, only send to customers with at least one past booking
+    if (filterByPastBookings) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Find customers with past bookings
+      const pastBookings = await Booking.find({
+        checkOutDate: { $lt: today },
+        status: { $ne: 'cancelled' },
+      }).distinct('guest');
+
+      if (pastBookings.length === 0) {
+        return res.status(200).json(
+          successResponse('No customers with past bookings found', {
+            sent: 0,
+            failed: 0,
+            total: 0,
+          }, 200)
+        );
+      }
+
+      userFilter._id = { $in: pastBookings };
+    }
+
+    // Get all active customers (or filtered customers)
+    const customers = await User.find(userFilter).select('name email');
+
+    if (customers.length === 0) {
+      return res.status(200).json(
+        successResponse('No customers found', {
+          sent: 0,
+          failed: 0,
+          total: 0,
+        }, 200)
+      );
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const results = [];
+
+    // Send promotion to each customer
+    for (const customer of customers) {
+      try {
+        await sendPromotion(customer, {
+          title,
+          message,
+          details: details || {},
+        });
+        sent++;
+        results.push({
+          customerId: customer._id,
+          email: customer.email,
+          status: 'sent',
+        });
+      } catch (error) {
+        failed++;
+        results.push({
+          customerId: customer._id,
+          email: customer.email,
+          status: 'failed',
+          error: error.message,
+        });
+        console.error(`Failed to send promotion to ${customer.email}:`, error);
+      }
+    }
+
+    res.status(200).json(
+      successResponse('Promotion emails processed', {
+        sent,
+        failed,
+        total: customers.length,
+        results,
       }, 200)
     );
   } catch (error) {

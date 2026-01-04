@@ -111,7 +111,6 @@ const Register = () => {
             >
               <option value="customer">Customer</option>
               <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
           <div className="form-group">

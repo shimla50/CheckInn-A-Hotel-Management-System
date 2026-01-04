@@ -56,7 +56,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2 className="auth-title">Login to CheckInn</h2>
+        <h2 className="auth-title">Welcome to CheckInn</h2>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -89,6 +89,9 @@ const Login = () => {
         </form>
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Register here</Link>
+        </p>
+        <p className="auth-footer">
+          Forgot password? <Link to="/forgot-password">Reset here</Link>
         </p>
       </div>
     </div>

@@ -16,8 +16,8 @@ const requestStore = new Map();
  * @returns {Function} Express middleware function
  */
 export const rateLimiter = (options = {}) => {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes default
-  const maxRequests = options.maxRequests || 100; // 100 requests default
+  const windowMs = options.windowMs || 1 * 60 * 10000000000000000000000000000000000000000000000000000000000000000000;
+  const maxRequests = options.maxRequests || 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
 
   return (req, res, next) => {
     const identifier = req.ip || req.connection.remoteAddress || 'unknown';

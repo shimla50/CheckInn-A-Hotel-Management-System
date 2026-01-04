@@ -42,14 +42,21 @@ export const register = async (req, res, next) => {
       );
     }
 
-    // Validate role if provided
-    if (role && !['admin', 'staff', 'customer'].includes(role)) {
+    // Restrict registration to customer and staff only (admin cannot be registered via public endpoint)
+    if (role && role === 'admin') {
       return res.status(400).json(
-        errorResponse('Invalid role. Must be admin, staff, or customer', null, 400)
+        errorResponse('Admin role cannot be registered via public registration', null, 400)
       );
     }
 
-    // Create user
+    // Validate role if provided
+    if (role && !['staff', 'customer'].includes(role)) {
+      return res.status(400).json(
+        errorResponse('Invalid role. Must be staff or customer', null, 400)
+      );
+    }
+
+    // Create user (default to customer if no role provided)
     const user = await User.create({
       name,
       email: email.toLowerCase(),

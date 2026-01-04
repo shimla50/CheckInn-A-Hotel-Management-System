@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "backup": "node scripts/backup.js"
+    "backup": "node scripts/backup.js",
+    "seed:rooms": "node scripts/seedRooms.js",
+    "seed:services": "node scripts/seedServices.js"
   },
   "keywords": [
     "hotel",
@@ -24,10 +26,10 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.3"
+    "mongoose": "^8.0.3",
+    "nodemailer": "^7.0.12"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   }
 }
-
