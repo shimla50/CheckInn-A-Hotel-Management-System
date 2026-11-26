@@ -1,6 +1,41 @@
-# CheckInn Hotel Management System
+# CheckInn — Hotel Management System
 
-A full-stack MERN stack hotel management system with role-based access control for admins, staff, and customers. The backend follows strict MVC architecture, and the frontend is built with React and Vite.
+A full-stack **MERN** hotel management system (MongoDB, Express, React, Node.js) with role-based access for **admins**, **staff** and **customers**. The backend follows a strict MVC architecture with a REST API; the frontend is a React + Vite single-page app.
+
+Built for **CSE470 (Software Engineering)** coursework at BRAC University, covering 21 functional and 10 non-functional requirements (see [docs/implementation-summary.md](docs/implementation-summary.md)).
+
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933)
+![React](https://img.shields.io/badge/React%2018-Vite-61DAFB)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248)
+![Auth](https://img.shields.io/badge/Auth-JWT%20%2B%20bcrypt-orange)
+
+## Features
+
+### Customers
+- Register, log in, reset a forgotten password
+- Search available rooms (Single, Double, Suite) and book them
+- Modify or cancel their own bookings
+- View invoices and payment history
+- Give feedback and see staff replies
+- Email notifications: booking confirmation and check-in reminders
+
+### Staff
+- Front-desk overview of today's arrivals and departures
+- Approve, modify and cancel bookings; check guests in and out
+- Record extra service usage (laundry, meals and more) and handle billing with cash, card or online payment (bKash, Nagad, Rocket, bank); the invoice is generated at checkout
+
+### Admins
+- Manage rooms, services, users and staff accounts
+- Reports: revenue (daily, weekly, monthly), occupancy, top services, revenue by payment method
+- Manage feedback, payments and system settings
+- Send reminder and promotion emails
+
+### Under the hood
+- JWT access and refresh tokens, bcrypt password hashing, role-based route protection
+- Rate limiting, input validation and central error handling middleware
+- Database indexes and pagination on list endpoints
+- Seed scripts for rooms and services, and a JSON backup script
+- Payment gateway integration point for SSLCommerz with a sandbox/demo mode
 
 ## Tech Stack
 
@@ -21,7 +56,7 @@ A full-stack MERN stack hotel management system with role-based access control f
 ## Project Structure
 
 ```
-checkinn_cse470_project/
+CheckInn-A-Hotel-Management-System/
 ├── client/              # React frontend
 │   ├── src/
 │   │   ├── components/  # Reusable components
@@ -140,6 +175,9 @@ The app will be available at `http://localhost:3000`
 - `GET /api/staff/dashboard` - Staff dashboard (Staff only)
 - `GET /api/customer/dashboard` - Customer dashboard (Customer only)
 
+### More
+Rooms, services, bookings, billing, service usage, feedback, reports, staff and admin routes are documented in [docs/api-overview.md](docs/api-overview.md).
+
 ## Database Seeding
 
 Seed the database with initial data:
@@ -198,3 +236,6 @@ For detailed architecture and API documentation, see:
 
 See [Architecture Documentation](docs/architecture.md) for detailed scaling and deployment strategies.
 
+## Author
+
+**Shimla** · GitHub: [@shimla50](https://github.com/shimla50)
